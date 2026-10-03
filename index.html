@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>藝術創傷測驗</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+  :root {
+    --ground: #edf1ec;
+    --surface: #f8faf6;
+    --ink: #1e2b27;
+    --ink-soft: #4a5b54;
+    --line: #c9d4c9;
+    --moss: #46664f;
+    --water: #2a7778;
+    --on-water: #ffffff;
+    --slip: #fbf6e6;
+    --slip-ink: #2d302a;
+    --slip-line: #e3d9b8;
+    --warn: #a15c2c;
+    --shadow: 0 1px 2px rgba(30, 43, 39, 0.10), 0 10px 24px -12px rgba(30, 43, 39, 0.28);
+    --display: "LXGW WenKai TC", "Kaiti TC", "DFKai-SB", "KaiTi", serif;
+    --body: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", "Heiti TC", sans-serif;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #131b18;
+      --surface: #1a2420;
+      --ink: #e5eee8;
+      --ink-soft: #a6b8ae;
+      --line: #2e3c36;
+      --moss: #8fb798;
+      --water: #6fc2c0;
+      --on-water: #0e1a18;
+      --slip: #262a23;
+      --slip-ink: #ece6d0;
+      --slip-line: #3d3f35;
+      --warn: #d99a6c;
+      --shadow: 0 1px 2px rgba(0,0,0,0.4), 0 10px 24px -12px rgba(0,0,0,0.6);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #131b18;
+    --surface: #1a2420;
+    --ink: #e5eee8;
+    --ink-soft: #a6b8ae;
+    --line: #2e3c36;
+    --moss: #8fb798;
+    --water: #6fc2c0;
+    --on-water: #0e1a18;
+    --slip: #262a23;
+    --slip-ink: #ece6d0;
+    --slip-line: #3d3f35;
+    --warn: #d99a6c;
+    --shadow: 0 1px 2px rgba(0,0,0,0.4), 0 10px 24px -12px rgba(0,0,0,0.6);
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--body);
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+  .wrap {
+    max-width: 460px;
+    margin-inline: auto;
+    padding: 28px 20px 48px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  h1, h2, h3 { font-family: var(--display); font-weight: 700; margin: 0; text-wrap: balance; line-height: 1.4; }
+  p { margin: 0; }
+  :focus-visible { outline: 3px solid var(--water); outline-offset: 2px; border-radius: 6px; }
+
+  /* progress */
+  .progress-track {
+    height: 4px; background: var(--line); border-radius: 999px; overflow: hidden;
+    margin-bottom: 28px; flex-shrink: 0;
+  }
+  .progress-fill { height: 100%; background: var(--moss); border-radius: 999px; transition: width .35s ease; }
+
+  .screen { display: none; flex-direction: column; flex: 1; animation: rise .4s ease both; }
+  .screen.active { display: flex; }
+  @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  @media (prefers-reduced-motion: reduce) { .screen { animation: none; } }
+
+  /* intro */
+  #intro { justify-content: center; text-align: center; gap: 22px; }
+  .eyebrow { font-size: .78rem; letter-spacing: .2em; color: var(--moss); font-weight: 500; }
+  #intro h1 { font-size: clamp(1.9rem, 8vw, 2.5rem); }
+  .intro-desc { color: var(--ink-soft); font-size: .98rem; max-width: 34em; margin-inline: auto; }
+  .intro-card {
+    background: var(--slip); color: var(--slip-ink); border: 1px solid var(--slip-line);
+    border-radius: 4px; padding: 20px; box-shadow: var(--shadow); text-align: left;
+    font-size: .92rem; transform: rotate(-.6deg);
+  }
+  .intro-card p + p { margin-top: 8px; }
+
+  /* buttons */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-height: 50px; padding: 12px 28px; border-radius: 999px;
+    font: 500 1rem/1 var(--body); text-decoration: none; cursor: pointer;
+    border: 1.5px solid transparent; background: var(--water); color: var(--on-water);
+    transition: transform .15s ease;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn-ghost { background: transparent; border-color: var(--line); color: var(--ink); }
+
+  /* question */
+  .q-screen { gap: 20px; }
+  .q-count { font-size: .8rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; letter-spacing: .06em; }
+  .q-text { font-size: 1.28rem; font-family: var(--display); font-weight: 700; margin-top: 6px; }
+  .options { display: flex; flex-direction: column; gap: 10px; margin-top: 6px; }
+  .opt {
+    text-align: left; background: var(--surface); border: 1.5px solid var(--line); border-radius: 10px;
+    padding: 14px 16px; font: 500 .96rem/1.5 var(--body); color: var(--ink); cursor: pointer;
+    transition: border-color .15s ease, background .15s ease;
+  }
+  .opt:hover { border-color: var(--moss); }
+  .opt[aria-pressed="true"] { border-color: var(--moss); background: color-mix(in srgb, var(--moss) 12%, var(--surface)); }
+  .q-nav { margin-top: auto; display: flex; justify-content: space-between; align-items: center; padding-top: 18px; }
+  .q-back { font-size: .88rem; color: var(--ink-soft); background: none; border: none; cursor: pointer; padding: 8px; }
+  .q-back:disabled { opacity: 0; pointer-events: none; }
+
+  /* result */
+  #result { gap: 20px; }
+  .result-tag { font-size: .78rem; letter-spacing: .18em; color: var(--moss); font-weight: 500; }
+  .result-title { font-size: clamp(1.7rem, 7vw, 2.2rem); margin-top: 6px; }
+  .result-score { margin-top: 2px; font-size: .88rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+  .meter { height: 10px; border-radius: 999px; background: var(--line); overflow: hidden; margin-top: 4px; }
+  .meter-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--moss), var(--warn)); transition: width .6s ease; }
+  .result-body { color: var(--ink-soft); font-size: .98rem; margin-top: 4px; }
+  .result-body p + p { margin-top: 10px; }
+  .invite {
+    margin-top: 10px; text-align: center;
+    display: flex; flex-direction: column; align-items: center; gap: 14px;
+  }
+  .invite h3 { font-size: 1.15rem; }
+  .invite p { font-size: .95rem; color: var(--ink-soft); max-width: 32em; }
+  .result-actions { display: flex; gap: 10px; margin-top: 4px; }
+  .result-actions .btn { flex: 1; }
+  .copy-note { font-size: .8rem; color: var(--ink-soft); min-height: 1.2em; }
+
+  /* other results */
+  .other-results { margin-top: 18px; border-top: 1px solid var(--line); padding-top: 20px; }
+  .other-results h3 { font-size: .98rem; color: var(--ink-soft); font-weight: 500; font-family: var(--body); }
+  .other-item {
+    border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; margin-top: 10px; background: var(--surface);
+  }
+  .other-item.is-current { border-color: var(--moss); background: color-mix(in srgb, var(--moss) 10%, var(--surface)); }
+  .other-item-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .other-item-title { font-family: var(--display); font-weight: 700; font-size: 1.02rem; }
+  .other-item-badge { font-size: .72rem; letter-spacing: .08em; color: var(--moss); font-weight: 500; flex-shrink: 0; }
+  .other-item-desc { font-size: .9rem; color: var(--ink-soft); margin-top: 6px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+
+  <section class="screen active" id="intro">
+    <p class="eyebrow">一個小小的自我測驗</p>
+    <h1>你的藝術創傷有多深？</h1>
+    <div class="intro-card">
+      <p><strong>什麼是「藝術創傷」？</strong></p>
+      <p>小時候因為一句「畫得不像」，或彩色筆突然沒水的驚慌失措，可能在你心裡留下了比想像中更深的痕跡——長大後一拿起筆就卻步，覺得自己「不會畫畫」「沒有天份」。這種因為害怕被評價而對創作感到恐懼、迴避的狀態，就是「藝術創傷」。</p>
+    </div>
+    <p class="intro-desc">八個問題，一分鐘。看看這些創傷有留在你的身體裡嗎？</p>
+    <button class="btn" id="startBtn">開始測驗</button>
+  </section>
+
+  <section class="screen q-screen" id="q0"></section>
+  <section class="screen q-screen" id="q1"></section>
+  <section class="screen q-screen" id="q2"></section>
+  <section class="screen q-screen" id="q3"></section>
+  <section class="screen q-screen" id="q4"></section>
+  <section class="screen q-screen" id="q5"></section>
+  <section class="screen q-screen" id="q6"></section>
+  <section class="screen q-screen" id="q7"></section>
+
+  <section class="screen" id="result">
+    <p class="result-tag" id="resultTag">你的結果</p>
+    <h2 class="result-title" id="resultTitle"></h2>
+    <p class="result-score" id="resultScore"></p>
+    <div class="meter"><div class="meter-fill" id="meterFill" style="width:0%"></div></div>
+    <div class="result-body" id="resultBody"></div>
+    <div class="intro-card">
+      <p>我也曾經有過藝術創傷。</p>
+      <p>我以為畫畫要畫得像，美有一定的規則。</p>
+      <p>後來我才知道，畫畫要用<strong>身體</strong>和<strong>呼吸</strong>。</p>
+      <p>藝術療癒師 ——小一</p>
+    </div>
+    <div class="invite">
+      <h3>森林開放畫室</h3>
+      <p>在北投的公園與森林裡，開了一間行動畫室，畫室裡有畫紙、畫布、各種媒材與一封大自然的邀請函。我們走進森林，不是來把畫畫好，而是坐下來，讓自然與藝術陪你一起呼吸。</p>
+      <a class="btn" href="https://claude.ai/artifact/S4WWC5x3jooYDrSdRW12y9" target="_blank" rel="noopener">了解森林開放畫室</a>
+    </div>
+    <div class="result-actions">
+      <button class="btn btn-ghost" id="copyBtn">複製我的結果</button>
+      <button class="btn btn-ghost" id="restartBtn">重新測一次</button>
+    </div>
+    <p class="copy-note" id="copyNote" aria-live="polite"></p>
+
+    <div class="other-results">
+      <h3>看看其他結果</h3>
+      <div id="otherResultsList"></div>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+  var questions = [
+    {
+      text: "現在看到一張白紙或空白畫布，你的第一個感覺是？",
+      options: [
+        { label: "躍躍欲試，想趕快畫點什麼", score: 0 },
+        { label: "還好，看心情", score: 1 },
+        { label: "有點壓力，不知道要畫什麼", score: 2 },
+        { label: "會下意識想避開，乾脆不畫了", score: 3 }
+      ]
+    },
+    {
+      text: "「這是什麼？」「畫得不像欸。」——聽到這幾句話，你會有什麼感覺？",
+      options: [
+        { label: "還好，就只是一句話", score: 0 },
+        { label: "有一點點不舒服，但很快就過了", score: 1 },
+        { label: "胸口會緊一下，有點被戳到", score: 2 },
+        { label: "瞬間回到某個畫面，心裡很不好受", score: 3 }
+      ]
+    },
+    {
+      text: "你會因為覺得「畫得不夠好」而不敢讓別人看自己的作品嗎？",
+      options: [
+        { label: "不會，畫完就想分享", score: 0 },
+        { label: "偶爾會猶豫一下", score: 1 },
+        { label: "常常藏起來，只有自己看", score: 2 },
+        { label: "幾乎從來不給人看", score: 3 }
+      ]
+    },
+    {
+      text: "你相信「畫畫是要有天份的」這句話嗎？",
+      options: [
+        { label: "不相信，誰都可以畫", score: 0 },
+        { label: "沒特別想過這件事", score: 1 },
+        { label: "有一點相信，覺得自己可能沒那個天份", score: 2 },
+        { label: "很相信，而且覺得自己就是沒天份的那種人", score: 3 }
+      ]
+    },
+    {
+      text: "你畫畫時，是不是一定要先用鉛筆打稿，才敢用顏料、鋼筆這類不能修改的媒材？",
+      options: [
+        { label: "不用，想到什麼直接畫", score: 0 },
+        { label: "看情況，有時候直接畫", score: 1 },
+        { label: "幾乎都要先打稿，才敢真正下筆", score: 2 },
+        { label: "一定要打稿，不然完全不敢碰顏料或鋼筆", score: 3 }
+      ]
+    },
+    {
+      text: "創作的時候，你會不自覺拿自己的作品跟別人比較嗎？",
+      options: [
+        { label: "不太會，各畫各的", score: 0 },
+        { label: "偶爾會瞄一下別人畫得怎樣", score: 1 },
+        { label: "常常比較，然後覺得自己不夠好", score: 2 },
+        { label: "幾乎每次都在比較，很難專心在自己的畫上", score: 3 }
+      ]
+    },
+    {
+      text: "創作到一半，心裡突然冒出一個聲音說「這樣不行」「太醜了」，你通常會？",
+      options: [
+        { label: "聽過就算了，手不會停", score: 0 },
+        { label: "停一下、深呼吸，然後繼續畫", score: 1 },
+        { label: "停筆很久，很難重新拿起筆", score: 2 },
+        { label: "直接放棄，甚至想把它藏起來或毀掉", score: 3 }
+      ]
+    },
+    {
+      text: "你上一次單純為了好玩、不求結果地塗鴉或畫畫，是多久以前？",
+      options: [
+        { label: "最近一週內", score: 0 },
+        { label: "大概一個月內", score: 1 },
+        { label: "一年以上了", score: 2 },
+        { label: "想不起來是什麼時候了", score: 3 }
+      ]
+    }
+  ];
+
+  var answers = new Array(questions.length).fill(null);
+  var current = 0;
+  var TOTAL_STEPS = questions.length + 2; // intro + questions + result
+
+  var introEl = document.getElementById('intro');
+  var resultEl = document.getElementById('result');
+  var progressFill = document.getElementById('progressFill');
+
+  function buildQuestionScreens() {
+    questions.forEach(function (q, i) {
+      var screen = document.getElementById('q' + i);
+      var html = '';
+      html += '<p class="q-count">問題 ' + (i + 1) + ' / ' + questions.length + '</p>';
+      html += '<h2 class="q-text">' + q.text + '</h2>';
+      html += '<div class="options" role="group">';
+      q.options.forEach(function (opt, oi) {
+        html += '<button class="opt" type="button" data-q="' + i + '" data-oi="' + oi + '" aria-pressed="false">' + opt.label + '</button>';
+      });
+      html += '</div>';
+      html += '<div class="q-nav"><button class="q-back" type="button" data-back="' + i + '">← 上一題</button><span></span></div>';
+      screen.innerHTML = html;
+    });
+  }
+
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(function (s) { s.classList.remove('active'); });
+    document.getElementById(id).classList.add('active');
+  }
+
+  function updateProgress(stepIndex) {
+    var pct = Math.round((stepIndex / (TOTAL_STEPS - 1)) * 100);
+    progressFill.style.width = pct + '%';
+  }
+
+  function goToQuestion(i) {
+    current = i;
+    showScreen('q' + i);
+    updateProgress(i + 1);
+    var screen = document.getElementById('q' + i);
+    var selected = answers[i];
+    screen.querySelectorAll('.opt').forEach(function (btn) {
+      btn.setAttribute('aria-pressed', selected !== null && Number(btn.dataset.oi) === selected ? 'true' : 'false');
+    });
+  }
+
+  function selectOption(qIndex, optIndex) {
+    answers[qIndex] = optIndex;
+    var screen = document.getElementById('q' + qIndex);
+    screen.querySelectorAll('.opt').forEach(function (btn) {
+      btn.setAttribute('aria-pressed', Number(btn.dataset.oi) === optIndex ? 'true' : 'false');
+    });
+    window.setTimeout(function () {
+      if (qIndex < questions.length - 1) {
+        goToQuestion(qIndex + 1);
+      } else {
+        showResult();
+      }
+    }, 220);
+  }
+
+  function totalScore() {
+    var sum = 0;
+    answers.forEach(function (a, i) {
+      if (a !== null) sum += questions[i].options[a].score;
+    });
+    return sum;
+  }
+
+  var tiers = [
+    {
+      title: "自由的藝術家",
+      summary: "幾乎沒有包袱，想畫就畫。",
+      body: [
+        "你和創作之間幾乎沒有包袱，想畫就畫，不太在意別人的眼光。",
+        "可以試試看挑戰不同的媒材——顏料、拼貼、陶土都可以，讓這份自由延伸出更多可能。"
+      ]
+    },
+    {
+      title: "沉睡中的畫家",
+      summary: "創作慾望還在，只是暫時睡著了。",
+      body: [
+        "你心裡的創作慾望其實還在，只是暫時睡著了。",
+        "可以先從熟悉的媒材開始，慢慢打開身體，好好呼吸，讓創作的感覺重新甦醒。"
+      ]
+    },
+    {
+      title: "小心翼翼的握筆人",
+      summary: "需要多一點安全感，才敢真正落筆。",
+      body: [
+        "你需要多一點安全感，才敢真正落筆。",
+        "可以先不急著畫出「什麼」，試試看只是塗一塊色塊、畫幾個幾何圖形，不求任何意義。"
+      ]
+    },
+    {
+      title: "深藏創傷的創作者",
+      summary: "拿起筆可能還是太沉重。",
+      body: [
+        "你心裡藏著不少藝術創傷，拿起筆可能還是太沉重。",
+        "建議可以先不拿筆，試試拼貼、輕黏土、陶土、毛線這類媒材，讓手慢慢重新熟悉創作的感覺，再慢慢回到畫筆的懷抱。"
+      ]
+    }
+  ];
+
+  function getTierIndex(score) {
+    var max = questions.length * 3;
+    if (score <= Math.round(max / 4)) return 0;
+    if (score <= Math.round(max / 2)) return 1;
+    if (score <= Math.round(max * 3 / 4)) return 2;
+    return 3;
+  }
+
+  function getTier(score) {
+    var max = questions.length * 3;
+    var idx = getTierIndex(score);
+    var t = tiers[idx];
+    return { index: idx, title: t.title, meter: score / max, body: t.body };
+  }
+
+  function renderOtherResults(currentIndex) {
+    var list = document.getElementById('otherResultsList');
+    list.innerHTML = tiers.map(function (t, i) {
+      var isCurrent = i === currentIndex;
+      return '<div class="other-item' + (isCurrent ? ' is-current' : '') + '">'
+        + '<div class="other-item-head">'
+        + '<span class="other-item-title">' + t.title + '</span>'
+        + (isCurrent ? '<span class="other-item-badge">這是你的結果</span>' : '')
+        + '</div>'
+        + '<p class="other-item-desc">' + t.summary + '</p>'
+        + '</div>';
+    }).join('');
+  }
+
+  function showResult() {
+    showScreen('result');
+    updateProgress(TOTAL_STEPS - 1);
+    var score = totalScore();
+    var max = questions.length * 3;
+    var tier = getTier(score);
+    document.getElementById('resultTitle').textContent = tier.title;
+    document.getElementById('resultScore').textContent = "你的藝術創傷指數：" + score + " / " + max;
+    document.getElementById('meterFill').style.width = Math.round(tier.meter * 100) + '%';
+    var bodyEl = document.getElementById('resultBody');
+    bodyEl.innerHTML = tier.body.map(function (p) { return '<p>' + p + '</p>'; }).join('');
+    renderOtherResults(tier.index);
+  }
+
+  buildQuestionScreens();
+
+  document.getElementById('startBtn').addEventListener('click', function () {
+    goToQuestion(0);
+  });
+
+  document.addEventListener('click', function (e) {
+    var opt = e.target.closest('.opt');
+    if (opt) {
+      selectOption(Number(opt.dataset.q), Number(opt.dataset.oi));
+      return;
+    }
+    var back = e.target.closest('[data-back]');
+    if (back) {
+      var i = Number(back.dataset.back);
+      if (i > 0) {
+        goToQuestion(i - 1);
+      } else {
+        showScreen('intro');
+        updateProgress(0);
+      }
+    }
+  });
+
+  document.getElementById('restartBtn').addEventListener('click', function () {
+    answers = new Array(questions.length).fill(null);
+    showScreen('intro');
+    updateProgress(0);
+  });
+
+  document.getElementById('copyBtn').addEventListener('click', function () {
+    var score = totalScore();
+    var max = questions.length * 3;
+    var tier = getTier(score);
+    var text = "我在「你也有藝術創傷嗎？」測驗得到：" + tier.title
+      + "（" + score + "/" + max + "）。森林開放畫室——不是來把畫畫好，只是一起帶著畫布走進森林。";
+    var noteEl = document.getElementById('copyNote');
+    function showCopied() {
+      noteEl.textContent = "已複製，可以貼到限動或聊天室分享給朋友";
+      window.setTimeout(function () { noteEl.textContent = ''; }, 3000);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(showCopied).catch(function () {
+        noteEl.textContent = text;
+      });
+    } else {
+      noteEl.textContent = text;
+    }
+  });
+})();
+</script>
+</body>
+</html>
